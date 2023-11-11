@@ -4,6 +4,7 @@ from flask import Flask, request, g, jsonify
 import time
 import sqlite3
 import json
+import re
 
 RF_QUEUE_FOLDER = '/data/queue'
 DATABASE = '/data/biactrl.db'
@@ -23,6 +24,11 @@ def get_db():
         db.row_factory = row_to_dict
     return db
 
+def paramcheck(param):
+    if param is not None and re.match(r'[\w\-_]+', param):
+        return True
+    return False
+
 @app.route('/devices', methods = ['GET'])
 def get_devices():
     result = get_db().execute('SELECT * FROM devices')
@@ -35,6 +41,8 @@ def hass_device_control():
     device = request.form.get('device')
     cmd = request.form.get('cmd')
     tstamp = int(time.time())
+    if not all([paramcheck(x) for x in [xtype, device, cmd]]):
+        return '', 400
     data = { 'type': xtype, 'device': device, 'cmd': cmd, 'time': tstamp }
 
     json_object = json.dumps(data)
@@ -51,4 +59,4 @@ def close_connection(exception):
         db.close()
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=4999, debug=True)
+    app.run(host="0.0.0.0", debug=True)
