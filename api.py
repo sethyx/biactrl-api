@@ -29,13 +29,13 @@ def paramcheck(param):
         return True
     return False
 
-@app.route('/devices', methods = ['GET'])
+@app.route('/api/devices', methods = ['GET'])
 def get_devices():
     result = get_db().execute('SELECT * FROM devices')
     devices = { 'devices' : result.fetchall() }
     return jsonify(devices)
 
-@app.route('/biactrl', methods = ['POST'])
+@app.route('/api/biactrl', methods = ['POST'])
 def hass_device_control():
     xtype = request.form.get('type')
     device = request.form.get('device')
